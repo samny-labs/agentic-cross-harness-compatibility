@@ -84,8 +84,11 @@ parse_md() {
     fi
   done < "$file"
 
-  # Trim trailing newlines from body
+  # Trim leading and trailing newlines from body
   BODY="${BODY%$'\n'}"
+  while [[ "$BODY" == $'\n'* ]]; do
+    BODY="${BODY#$'\n'}"
+  done
 }
 
 # Extract a YAML value by key (simple single-line or folded scalar).
@@ -173,13 +176,22 @@ for src in "${SOURCE_DIR}"/*.md; do
 
   echo "Syncing agent: ${name}"
 
+  # Build optional tools lines
+  copilot_tools_line=""
+  generic_tools_line=""
+  codex_tools_line=""
+  if [[ -n "$tools_raw" ]]; then
+    copilot_tools_line=$'\n'"tools: [${tools_raw}]"
+    generic_tools_line=$'\n'"tools: ${tools_raw}"
+    codex_tools_line=$'\n'"# tools: ${tools_raw} — map to Codex equivalents if needed"
+  fi
+
   # --- Copilot (.github/agents/*.agent.md) ---
   copilot_content="${GENERATED_MARKER}
 ---
 name: ${name}
 description: >
-  ${description}
-$([ -n "$tools_raw" ] && echo "tools: [${tools_raw}]")
+  ${description}${copilot_tools_line}
 ---
 
 ${BODY}"
@@ -191,8 +203,7 @@ ${BODY}"
 ---
 name: ${name}
 description: >
-  ${description}
-$([ -n "$tools_raw" ] && echo "tools: ${tools_raw}")
+  ${description}${generic_tools_line}
 ---
 
 ${BODY}"
@@ -204,8 +215,7 @@ ${BODY}"
 ---
 name: ${name}
 description: >
-  ${description}
-$([ -n "$tools_raw" ] && echo "tools: ${tools_raw}")
+  ${description}${generic_tools_line}
 ---
 
 ${BODY}"
@@ -222,8 +232,7 @@ ${BODY}"
 
 [agent]
 name = \"${name}\"
-description = \"${description}\"
-$([ -n "$tools_raw" ] && echo "# tools: ${tools_raw} — map to Codex equivalents if needed")
+description = \"${description}\"${codex_tools_line}
 
 instructions = \"\"\"
 ${toml_body}
@@ -236,8 +245,7 @@ ${toml_body}
 ---
 name: ${name}
 description: >
-  ${description}
-$([ -n "$tools_raw" ] && echo "tools: ${tools_raw}")
+  ${description}${generic_tools_line}
 ---
 
 ${BODY}"
