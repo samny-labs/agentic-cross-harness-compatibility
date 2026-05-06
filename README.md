@@ -8,7 +8,7 @@
 
 - **`AGENTS.md` is the only file all five tools read natively** — use it as your single source of project context. Directory-scoped `AGENTS.md` files also work universally for monorepos.
 - **Prefer skills over ad hoc prompts or command files** for reusable workflows. Skills double as slash commands across all harnesses.
-- **Custom agents and subagents do not automatically get skill context.** Some runtimes (e.g., Claude Code) support explicit skill preloading (e.g., a skills: field); others may not have a single dedicated knob but can still provide tools via the host/workspace setup. For reliability, include must-have tool knowledge and usage rules directly in the custom agent definition.
+- **Custom agents and subagents do not automatically get skill context.** For reliability, include must-have tool knowledge and usage rules directly in the custom agent definition.
 - **Avoid tool-specific names in skills** whenever possible. Describe intent and expected outcomes instead, and only add a compatibility mapping when explicit tool references are unavoidable.
 - **For hooks `.claude/settings.json` is the best shared foundation** — Cursor, Copilot, and Claude Code all read them natively. Write hooks once, get coverage across three tools.
 
